@@ -10,7 +10,7 @@
 
 <body>
     <h1>Control Page</h1>
-    <form method="post" action="/control/">
+    <form method="post" action=".">
         {% csrf_token %}
         {{form.as_p}}
         <button type="submit" , name="post">Post Command</button>

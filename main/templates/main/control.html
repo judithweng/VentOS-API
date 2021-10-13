@@ -15,6 +15,22 @@
         {{form.as_p}}
         <button type="submit" , name="post">Post Command</button>
     </form>
+    Please refer to the <a href="https://github.com/PubInv/PIRCS-pubinv-respiration-control-standard/blob/master/PIRCS.md">PIRCS</a> standard for a detailed description of meaning of possible entries.
+
+    The following values are a command (C) to set the Target (T) Pressure (P) to 40 cmH2O (we transfer integral number of cmH2O times 10, or mmH2O):
+<pre>
+{ "com": "C",
+  "par" : "P",
+  "int" : "T",
+  "mod" : 0,
+  "val" : 400
+    }
+</pre>
+
+To test this programmatically, use can use anything that makes a post such as curl:
+<pre>
+curl -d "com=C&par=P&int=42&mod=0&val=400" -X POST http://127.0.0.1:8000/control/
+  </pre>
 </body>
 
 </html>

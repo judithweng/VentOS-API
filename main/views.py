@@ -50,6 +50,7 @@ def set_state_from_PIRCS(p):
         print("unknown par field",file=sys.stderr)
         print(p.par,file=sys.stderr)
 
+@csrf_exempt
 def data(response, n):
     global most_recent_data_return_ms
     global PIP_pressure_cmH2O
@@ -93,7 +94,13 @@ def data(response, n):
         pirds_samples.append(f_pirds)
 
     json_object = json.dumps(pirds_samples, indent = 2)
-    return HttpResponse(json_object, content_type="application/json")
+    response =  HttpResponse(json_object, content_type="application/json")
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+    return response
+
 
 @csrf_exempt
 def control(response):

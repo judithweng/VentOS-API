@@ -78,6 +78,8 @@ def data(response, n):
         current_sample_ms = start_sample_ms + s * sample_rate_ms
         p_mmH2O = int(PIP_pressure_cmH2O * 10 * math.sin(2 * math.pi * current_sample_ms / test_frequency_ms))
         f = int(FLOW_RATE_ml_min * math.sin((2 * math.pi * (current_sample_ms + test_frequency_ms/2) / test_frequency_ms)))
+        # Call Step, take pressure and flow and put in PIRDS (from Dr. Schulz's code)
+        # How does Erich compute flow?
         p_pirds = { "event" : "M",
                     "type" : "D",
                     "loc" : "I",

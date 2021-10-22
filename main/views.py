@@ -13,12 +13,16 @@ import json
 
 # Create your views here.
 
-most_recent_data_return = time.time_ns() / 1000
+most_recent_data_return_ms = time.time_ns() / 1000000
 test_frequency_ms = 6000
 sample_rate_ms = 25
 MAX_SAMPLES = 1000
+FLOW_RATE_ml_min = 18000
+
 PIP_pressure_cmH2O = 20
-FLOW_RATE_ml_min = 1300
+Breaths_per_min = 10
+Target_Flow_Rate_ml_per_s = 6000
+MODE = 'P'
 
 # This will be redone, but here I create a tiny
 # "settings" state that we can manipulate with the PIRCS
@@ -30,11 +34,24 @@ def set_state_from_PIRCS(p):
         PIP_pressure_cmH2O = int(p.val/10)
         print("Set Pressure to:",file=sys.stderr)
         print(PIP_pressure_cmH2O,file=sys.stderr)
+    elif (p.par == 'B' and p.int == 'T'):
+        Breaths_per_min = int(p.val/10)
+        print("Set Breaths Per Minute to:",file=sys.stderr)
+        print(Breaths_per_min,file=sys.stderr)
+    elif (p.par == 'F' and p.int == 'T'):
+        Target_Flow_Rate_ml_per_s = int(p.val)
+        print("Target Flow Rate:",file=sys.stderr)
+        print(Target_Flow_Rate_ml_per_s,file=sys.stderr)
+    elif (p.par == 'M'):
+        MODE = p.int
+        print("Mode Set To:",file=sys.stderr)
+        print(MODE,file=sys.stderr)
     else:
-        print
+        print("unknown par field",file=sys.stderr)
+        print(p.par,file=sys.stderr)
 
 def data(response, n):
-    global most_recent_data_return
+    global most_recent_data_return_ms
     global PIP_pressure_cmH2O
     # return the first n data in the database
     # TODO
@@ -50,8 +67,8 @@ def data(response, n):
 # The flow wave will be both negative and positive (as if we are flowing
 # out the same sensor we flowed in through)
     pirds_samples = []
-    duration_ms = ms - most_recent_data_return
-    most_recent_data_return = ms
+    duration_ms = ms - most_recent_data_return_ms
+    most_recent_data_return_ms = ms
 
     num_samples = int(min(duration_ms / sample_rate_ms, MAX_SAMPLES))
     start_sample_ms = ms - (num_samples * sample_rate_ms)

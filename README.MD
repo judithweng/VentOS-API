@@ -39,6 +39,10 @@ Erich is currently doing this by rsyncing files with server and vica versa:
     rsync -au /home/erich/ventos_api/main erich@drop1:/home/erich/accord1
     rsync -au erich@drop1:/home/erich/accord1/main /home/erich/ventos_api
 
+Then a restart of the gunicorn and nginx service:
+
+    /home/erich/accord1/restart.sh
+
 The endpoints are visible at this temporary home:
 
     https://ventos.dev/ventos/3

@@ -252,6 +252,7 @@ def data(response, n):
     most_recent_data_return_ms = ms
 
     num_samples = int(min(duration_ms / sample_rate_ms, MAX_SAMPLES))
+    num_samples = min(num_samples, n)
     start_sample_ms = ms - (num_samples * sample_rate_ms)
 
     for current_sample_ms in range(start_sample_ms, ms, sample_rate_ms):

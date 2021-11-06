@@ -216,10 +216,21 @@ def set_state_from_PIRCS(p):
         ventilator.Pi = PIP_pressure_cmH2O
         print("Set Pressure to:", file=sys.stderr)
         print(PIP_pressure_cmH2O, file=sys.stderr)
+
     elif (p.par == 'B' and p.int == 'T'):
         Breaths_per_min = int(p.val/10)
+         # Warning: This needst to be cleand up
+        ventilator.rate = Breaths_per_min
         print("Set Breaths Per Minute to:", file=sys.stderr)
         print(Breaths_per_min, file=sys.stderr)
+
+    elif (p.par == 'I' and p.int == 'T'):
+        IE = 1/( p.val / 10);
+         # Warning: This needst to be cleand up
+        ventilator.IE = IE
+        print("Set IE ratio to to:", file=sys.stderr)
+        print(IE, file=sys.stderr)
+
     elif (p.par == 'F' and p.int == 'T'):
         Target_Flow_Rate_ml_per_s = int(p.val)
         print("Target Flow Rate:", file=sys.stderr)

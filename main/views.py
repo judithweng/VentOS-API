@@ -28,6 +28,8 @@ FLOW_RATE_ml_min = 18000
 PIP_pressure_cmH2O = 20
 Breaths_per_min = 10
 Target_Flow_Rate_ml_per_s = 6000
+PEEP = 5
+IE = 0.5
 MODE = 'P'
 
 
@@ -205,9 +207,13 @@ def loop(patient, ventilator,
 def set_state_from_PIRCS(p):
     global PIP_pressure_cmH2O
     global Target_Flow_Rate_ml_per_s
+    global ventilator
+    global patient
 
     if (p.par == 'P' and p.int == 'T'):
         PIP_pressure_cmH2O = int(p.val/10)
+        # Warning: This needst to be cleand up
+        ventilator.Pi = PIP_pressure_cmH2O
         print("Set Pressure to:", file=sys.stderr)
         print(PIP_pressure_cmH2O, file=sys.stderr)
     elif (p.par == 'B' and p.int == 'T'):
@@ -227,19 +233,36 @@ def set_state_from_PIRCS(p):
         print(p.par, file=sys.stderr)
 
 
+# Global patient and ventilator state
+patient = Patient()
+ventilator = Ventilator("PCV",PIP_pressure_cmH2O,PEEP,Breaths_per_min,IE)
+
+
+
+#
+def advance_breath_to_point(v,p,time_in_breath_cycle_ms):
+    # probably this should be zero
+    patient = Patient(pressure_mouth=PIP_pressure_cmH2O)
+    ventilator = Ventilator(PEEP=PIP_pressure_cmH2O,
+                            rate=Target_Flow_Rate_ml_per_s)
+
+
 @csrf_exempt
 def data(response, n):
     global most_recent_data_return_ms
     global PIP_pressure_cmH2O
     global Target_Flow_Rate_ml_per_s
+    global patient
+    global ventilator
 
     ms = int(time.time_ns() / 1000000)  # we want the time in ms
 
-    patient = Patient(pressure_mouth=PIP_pressure_cmH2O)
-    ventilator = Ventilator(PEEP=PIP_pressure_cmH2O,
-                            rate=Target_Flow_Rate_ml_per_s)
+    # patient = Patient(pressure_mouth=PIP_pressure_cmH2O)
+    # ventilator = Ventilator(PEEP=PIP_pressure_cmH2O,
+    #                         rate=Target_Flow_Rate_ml_per_s)
 
-    patient_status = patient.advance(advance_time=most_recent_data_return_ms)
+    patient_status = patient.status()
+   # patient.advance(advance_time=most_recent_data_return_ms)
 
     # Now I will create a returned set of sine waves for testing
     # These will be "correct" in the since that they are tied to the epoch time.
@@ -261,8 +284,8 @@ def data(response, n):
         patient_status = patient.advance(
             advance_time=sample_rate_ms, pressure_mouth=ventilator_status.pressure_mouth)
 
-        p_mmH2O = patient_status.pressure_mouth
-        f = patient_status.flow
+        p_mmH2O = patient_status.pressure_mouth*10
+        f = patient_status.flow*10
 
         # p_mmH2O = int(PIP_pressure_cmH2O * 10 * math.sin(2 *
         #               math.pi * current_sample_ms / test_frequency_ms))

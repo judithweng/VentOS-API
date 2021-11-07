@@ -14,12 +14,19 @@ Simply clone the repo, create a python "environment", install dependancies, crea
     cd [working folder]
     git clone [repo]
     cd [project folder]
+    
     # create and activate venv
     python3 -m venv ventosapivenv
     source ventosapivenv/bin/activate
+    
     # install dependancies and create superuser (follow prompts)
     pipenv install
     ./manage.py createsuperuser
+
+    # install pandas and matplotlib
+    pip install pandas
+    pip install matplotlib
+    pip install pynverse
 
 Then to run a local server:
 

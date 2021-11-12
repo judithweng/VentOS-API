@@ -4,6 +4,7 @@ import pandas as pd
 
 from dataclasses import dataclass, asdict
 from pynverse import inversefunc
+from pprint import pprint
 
 # -----
 # from Dr. Schulz's code
@@ -146,7 +147,7 @@ class Ventilator:
 
 
 def loop(patient, ventilator,
-         start_time=0, end_time=20000, time_resolution=50):
+         start_time=0, end_time=20000, time_resolution=50, events=[]):
     # print('starting', patient.status())
     patient_status = patient.advance(advance_time=0)
     # print('vent starting', ventilator.status())
@@ -168,3 +169,39 @@ def loop(patient, ventilator,
     #     print(f'WARNING {len(events)} unprocessed')
 
     return df
+
+
+# excecute a scenario (s)
+# returns a dataframe
+def execute_scenario(s):
+    # print("FROM EXECUTE SCENARIO")
+    # pprint(s)
+    p = Patient(resistance=s['resistance'], pressure_mouth=s['PEEP'])
+    v = Ventilator(PEEP=s['PEEP'], rate=s['rate'], IE=s['IE'], Pi=s['Pi'])
+    pdf = loop(p, v,
+               end_time=s['end_time'] * 1000, time_resolution=s['time_resolution'],
+               events=s['events'])
+    # decorate_sim(pdf, s)
+    return pdf
+
+
+litres_per_second_to_ml_per_minute = 60*1000
+
+
+def df_to_PIRDS(df):
+    pirds = []
+    for index, r in df.iterrows():
+        pirds.append({"event": "M",
+                      "type": "P", "loc": "I",
+                      "ms": int(r.time), "val": int(round(r.pressure_mouth))})
+        # pirds.append({"event": "M",
+        #               "type": "P", "loc": "E",
+        #               "ms": int(r.time), "val": int(round(r.pressure_2))})
+        pirds.append({"event": "M",
+                      "type": "F", "loc": "I",
+                      "ms": int(r.time), "val": int(round(r.flow * litres_per_second_to_ml_per_minute))})
+        # pirds.append({"event": "M",
+        #               "type": "F", "loc": "E",
+        #               "ms": int(r.time), "val": int(round(r.flow_e * litres_per_second_to_ml_per_minute))})
+    # return pd.DataFrame.from_records(pirds)
+    return pirds

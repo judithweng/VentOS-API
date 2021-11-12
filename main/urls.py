@@ -11,4 +11,7 @@ urlpatterns = [
 
     # for inputting PIRCS commands (+UI)
     path('control/', views.control, name='control'),
+
+    # for any "badness" scenario
+    path('badness/', views.badness, name='badness'),
 ]

@@ -2,8 +2,8 @@ from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.serializers import serialize
-from .models import PIRCS
-from .forms import PostNewCommand
+from .models import PIRCS, Person
+from .forms import PostNewCommand, PersonForm
 from django.views.decorators.csrf import csrf_exempt
 from .lung_sim import Patient, Ventilator
 
@@ -170,3 +170,29 @@ def control(response):
         form = PostNewCommand()
 
     return render(response, "main/control.html", {"form": form})
+
+
+@csrf_exempt
+def home(response):
+    data = Person.objects.all()
+
+    if response.method == "POST":
+        form = PersonForm(response.POST)
+
+        if form.is_valid():
+            # get the id of the patient
+            chosen_id = form.cleaned_data["chosen_patient"]
+            # print("PATIENT ID: " + str(chosen_id))
+            chosen_patient = data.filter(id=chosen_id)
+            # print("PATIENT DATA: " + str(chosen_patient) + "\n")
+
+            # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
+            compliance = chosen_patient[0].compliance
+            resistance = chosen_patient[0].resistance
+            print("COMPLIANCE: " + str(compliance) +
+                  " AND RESISTANCE: " + str(resistance) + "\n")
+
+    else:
+        form = PersonForm()
+
+    return render(response, "main/home.html", {"form": form})

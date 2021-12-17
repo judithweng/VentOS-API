@@ -27,6 +27,6 @@ class Person(models.Model):
     compliance = models.FloatField()
 
     def __str__(self) -> str:
-        return ("id: " + str(self.id) + "\nheight: " + str(self.height) +
+        return ("id: " + str(self.id) + ", height: " + str(self.height) +
                 " cm, weight: " + str(self.weight) + " kg, sex: " + self.sex +
-                "\nresistance: " + str(self.resistance) + ", compliance: " + str(self.compliance))
+                ", resistance: " + str(self.resistance) + ", compliance: " + str(self.compliance))

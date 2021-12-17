@@ -71,6 +71,24 @@ def set_state_from_PIRCS(p):
         print(p.par, file=sys.stderr)
 
 
+def set_patient_state(pid):
+    global patient
+
+    data = Person.objects.all()
+    chosen_patient = data.filter(id=pid)
+
+    # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
+    patient.weight = chosen_patient[0].weight
+    patient.height = chosen_patient[0].height
+    patient.sex = chosen_patient[0].sex
+    patient.resistance = chosen_patient[0].resistance
+    # compliance = chosen_patient[0].compliance
+
+    print("Patient state is set. Height: " + str(patient.height) + "cm, weight: " + str(patient.weight) +
+          " kg, sex: " + patient.sex + ", resistance: " + str(patient.resistance))
+    #    + ", compliance: " + str(compliance))
+
+
 # Global patient and ventilator state
 patient = Patient()
 ventilator = Ventilator("PCV", PIP_pressure_cmH2O, PEEP, Breaths_per_min, IE)
@@ -174,23 +192,23 @@ def control(response):
 
 @csrf_exempt
 def home(response):
-    data = Person.objects.all()
-
     if response.method == "POST":
         form = PersonForm(response.POST)
 
         if form.is_valid():
             # get the id of the patient
             chosen_id = form.cleaned_data["chosen_patient"]
+            set_patient_state(chosen_id)
+
             # print("PATIENT ID: " + str(chosen_id))
-            chosen_patient = data.filter(id=chosen_id)
+            # chosen_patient = data.filter(id=chosen_id)
             # print("PATIENT DATA: " + str(chosen_patient) + "\n")
 
-            # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
-            compliance = chosen_patient[0].compliance
-            resistance = chosen_patient[0].resistance
-            print("COMPLIANCE: " + str(compliance) +
-                  " AND RESISTANCE: " + str(resistance) + "\n")
+            # # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
+            # chosen_compliance = chosen_patient[0].compliance
+            # chosen_resistance = chosen_patient[0].resistance
+            # print("COMPLIANCE: " + str(chosen_compliance) +
+            #       " AND RESISTANCE: " + str(chosen_resistance) + "\n")
 
     else:
         form = PersonForm()

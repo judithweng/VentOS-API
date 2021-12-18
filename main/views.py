@@ -25,6 +25,8 @@ PEEP = 5
 IE = 0.5
 MODE = 'P'
 
+pid = Person.objects.first().id
+
 # This will be redone, but here I create a tiny
 # "settings" state that we can manipulate with the PIRCS
 # commands below, and the data response will depend on it.
@@ -71,11 +73,12 @@ def set_state_from_PIRCS(p):
         print(p.par, file=sys.stderr)
 
 
-def set_patient_state(pid):
+def set_patient_state():
     global patient
+    global pid
 
-    data = Person.objects.all()
-    chosen_patient = data.filter(id=pid)
+    patient_data = Person.objects.all()
+    chosen_patient = patient_data.filter(id=pid)
 
     # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
     patient.weight = chosen_patient[0].weight
@@ -154,6 +157,46 @@ def data(response, n):
 
 
 @csrf_exempt
+def patient_info(response):
+    global pid
+
+    data = Person.objects.all()
+    # chosen_patient = data.filter(id=pid)
+
+    # patient_data = {}
+    # patient_data['id'] = str(chosen_patient[0].id)
+    # patient_data['name] = chosen_patient[0].name
+    # patient_data['weight'] = chosen_patient[0].weight
+    # patient_data['height'] = chosen_patient[0].height
+    # patient_data['sex'] = chosen_patient[0].sex
+    # patient_data['resistance'] = chosen_patient[0].resistance
+    # patient_data['compliance'] = chosen_patient[0].compliance
+    # json_object = json.dumps(patient_data, indent=2)
+
+    patients_data = []
+
+    for d in data:
+        patient_data = {}
+        patient_data['id'] = str(d.id)
+        patient_data['name'] = d.name
+        patient_data['weight'] = d.weight
+        patient_data['height'] = d.height
+        patient_data['sex'] = d.sex
+        patient_data['resistance'] = d.resistance
+        patient_data['compliance'] = d.compliance
+        patients_data.append(patient_data)
+
+    json_object = json.dumps(patients_data, indent=2)
+    response = HttpResponse(json_object, content_type="application/json")
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+
+    return response
+
+
+@csrf_exempt
 def control(response):
     if response.method == "POST":
         form = PostNewCommand(response.POST)
@@ -192,23 +235,15 @@ def control(response):
 
 @csrf_exempt
 def home(response):
+    global pid
+
     if response.method == "POST":
         form = PersonForm(response.POST)
 
         if form.is_valid():
             # get the id of the patient
-            chosen_id = form.cleaned_data["chosen_patient"]
-            set_patient_state(chosen_id)
-
-            # print("PATIENT ID: " + str(chosen_id))
-            # chosen_patient = data.filter(id=chosen_id)
-            # print("PATIENT DATA: " + str(chosen_patient) + "\n")
-
-            # # since we filter using unique id, this is guaranteed to be at max 1, so [0] is used
-            # chosen_compliance = chosen_patient[0].compliance
-            # chosen_resistance = chosen_patient[0].resistance
-            # print("COMPLIANCE: " + str(chosen_compliance) +
-            #       " AND RESISTANCE: " + str(chosen_resistance) + "\n")
+            pid = form.cleaned_data["chosen_patient"]
+            set_patient_state()
 
     else:
         form = PersonForm()

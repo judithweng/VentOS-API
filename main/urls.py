@@ -10,4 +10,6 @@ urlpatterns = [
     path('control/', views.control, name='control'),
 
     path('', views.home, name='home'),
+
+    path('patient/', views.patient_info, name='patient')
 ]

@@ -70,3 +70,8 @@ class Session(models.Model):
     patientState = models.OneToOneField(PatientState, on_delete=models.CASCADE)
     ventilatorState = models.OneToOneField(
         VentilatorState, on_delete=models.CASCADE)
+
+
+class History(models.Model):
+    person = models.OneToOneField(Person, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)

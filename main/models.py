@@ -62,3 +62,11 @@ class VentilatorState(models.Model):
 
     def __str__(self) -> str:
         return str(self.log[-1])
+
+
+class Session(models.Model):
+    timestamp = models.FloatField()
+    pircs = models.OneToOneField(PIRCS, on_delete=models.CASCADE)
+    patientState = models.OneToOneField(PatientState, on_delete=models.CASCADE)
+    ventilatorState = models.OneToOneField(
+        VentilatorState, on_delete=models.CASCADE)

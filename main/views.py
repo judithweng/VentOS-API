@@ -107,8 +107,8 @@ def data(response, n):
 
     # print("PATIENT LOG")
     # print(patient.log)
-    # print("VENTILATOR LOG")
-    # print(ventilator.log)
+    print("VENTILATOR LOG")
+    print(ventilator.log)
 
     ms = int(time.time_ns() / 1000000)  # we want the time in ms
     patient_status = patient.status()

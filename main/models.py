@@ -45,4 +45,20 @@ class PatientState(models.Model):
     log = models.JSONField()
 
     def __str__(self) -> str:
-        return str(self.log)
+        return str(self.log[-1])
+
+
+class VentilatorState(models.Model):
+    pressure = models.FloatField()
+    pressure_mouth = models.FloatField()
+    mode = models.CharField(max_length=3)
+    Pi = models.FloatField()
+    PEEP = models.FloatField()
+    rate = models.FloatField()
+    IE = models.FloatField()
+    phase = models.CharField(max_length=1)
+    log = models.JSONField()
+    time = models.FloatField()
+
+    def __str__(self) -> str:
+        return str(self.log[-1])

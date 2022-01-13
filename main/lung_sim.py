@@ -59,9 +59,9 @@ def pressure_from_volume(v, type="Total"):
 
 
 # setting up Patient
-Patient_log = collections.namedtuple(
-    'Patient_log',
-    ['time', 'pressure_mouth', 'pressure_alveolus', 'pressure_intrapleural', 'lung_volume', 'flow'])
+# Patient_log = collections.namedtuple(
+#     'Patient_log',
+#     ['time', 'pressure_mouth', 'pressure_alveolus', 'pressure_intrapleural', 'lung_volume', 'flow'])
 
 
 class Patient:
@@ -88,7 +88,13 @@ class Patient:
         self.log = []
 
     def status(self):
-        return Patient_log(self.time, self.pressure_mouth, self.pressure_alveolus, self.pressure_intrapleural, self.lung_volume, self.flow)
+        # return Patient_log(self.time, self.pressure_mouth, self.pressure_alveolus, self.pressure_intrapleural, self.lung_volume, self.flow)
+        return {"time": self.time,
+                "pressure_mouth": self.pressure_mouth,
+                "pressure_alveolus": self.pressure_alveolus,
+                "pressure_intrapleural": self.pressure_intrapleural,
+                "lung_volume": self.lung_volume,
+                "flow": self.flow}
 
     def advance(self, advance_time=200, pressure_mouth=0):
         self.time = self.time + advance_time  # miliseconds
@@ -105,8 +111,8 @@ class Patient:
 
 
 # setting up Ventilator
-Ventilator_log = collections.namedtuple(
-    'Ventilator_log', ['time', 'phase', 'pressure', 'pressure_mouth'])
+# Ventilator_log = collections.namedtuple(
+#     'Ventilator_log', ['time', 'phase', 'pressure', 'pressure_mouth'])
 
 
 class Ventilator:
@@ -126,7 +132,11 @@ class Ventilator:
         return self.PEEP if self.phase == "E" else self.Pi
 
     def status(self):
-        return Ventilator_log(self.time, self.phase, self.pressure, self.pressure_mouth)
+        # return Ventilator_log(self.time, self.phase, self.pressure, self.pressure_mouth)
+        return {"time": self.time,
+                "phase": self.phase,
+                "pressure": self.pressure,
+                "pressure_mouth": self.pressure_mouth}
 
     def advance(self, advance_time=200, pressure_mouth=0):
         self.time = self.time + advance_time  # miliseconds
@@ -145,26 +155,26 @@ class Ventilator:
         return status
 
 
-def loop(patient, ventilator,
-         start_time=0, end_time=20000, time_resolution=50):
-    # print('starting', patient.status())
-    patient_status = patient.advance(advance_time=0)
-    # print('vent starting', ventilator.status())
-    for current_time in range(start_time, end_time, time_resolution):
-        ventilator_status = ventilator.advance(
-            advance_time=time_resolution, pressure_mouth=patient_status.pressure_mouth)
-        patient_status = patient.advance(
-            advance_time=time_resolution, pressure_mouth=ventilator_status.pressure_mouth)
+# def loop(patient, ventilator,
+#          start_time=0, end_time=20000, time_resolution=50):
+#     # print('starting', patient.status())
+#     patient_status = patient.advance(advance_time=0)
+#     # print('vent starting', ventilator.status())
+#     for current_time in range(start_time, end_time, time_resolution):
+#         ventilator_status = ventilator.advance(
+#             advance_time=time_resolution, pressure_mouth=patient_status.pressure_mouth)
+#         patient_status = patient.advance(
+#             advance_time=time_resolution, pressure_mouth=ventilator_status.pressure_mouth)
 
-        # if len(events) and events[0]['time']*1000 <= current_time:
-        #     e = events.pop(0)
-        #     print(
-        #         f'Event at {current_time}ms setting {e["attr"]} to {e["val"]}')
-        #     setattr(ventilator, e["attr"], e["val"])
+#         # if len(events) and events[0]['time']*1000 <= current_time:
+#         #     e = events.pop(0)
+#         #     print(
+#         #         f'Event at {current_time}ms setting {e["attr"]} to {e["val"]}')
+#         #     setattr(ventilator, e["attr"], e["val"])
 
-    df = pd.DataFrame.from_records(patient.log, columns=Patient_log._fields)
+#     df = pd.DataFrame.from_records(patient.log, columns=Patient_log._fields)
 
-    # if len(events):
-    #     print(f'WARNING {len(events)} unprocessed')
+#     # if len(events):
+#     #     print(f'WARNING {len(events)} unprocessed')
 
-    return df
+#     return df

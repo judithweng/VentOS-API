@@ -105,6 +105,11 @@ def data(response, n):
     global patient
     global ventilator
 
+    # print("PATIENT LOG")
+    # print(patient.log)
+    # print("VENTILATOR LOG")
+    # print(ventilator.log)
+
     ms = int(time.time_ns() / 1000000)  # we want the time in ms
     patient_status = patient.status()
 
@@ -124,12 +129,12 @@ def data(response, n):
 
     for current_sample_ms in range(start_sample_ms, ms, sample_rate_ms):
         ventilator_status = ventilator.advance(
-            advance_time=sample_rate_ms, pressure_mouth=patient_status.pressure_mouth)
+            advance_time=sample_rate_ms, pressure_mouth=patient_status["pressure_mouth"])
         patient_status = patient.advance(
-            advance_time=sample_rate_ms, pressure_mouth=ventilator_status.pressure_mouth)
+            advance_time=sample_rate_ms, pressure_mouth=ventilator_status["pressure_mouth"])
 
-        p_mmH2O = patient_status.pressure_mouth*10
-        f = patient_status.flow*10
+        p_mmH2O = patient_status["pressure_mouth"]*10
+        f = patient_status["flow"]*10
 
         p_pirds = {"event": "M",
                    "type": "D",

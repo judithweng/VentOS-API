@@ -1,8 +1,8 @@
 from django.http.response import JsonResponse
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .models import PIRCS, Person
+from .models import PIRCS, History, PatientState, Person, VentilatorState, Session
 from .forms import PostNewCommand, PersonForm
 from django.views.decorators.csrf import csrf_exempt
 from .lung_sim import Patient, Ventilator
@@ -76,6 +76,7 @@ def set_state_from_PIRCS(p):
 def set_patient_state():
     global patient
     global pid
+    global ventilator
 
     patient_data = Person.objects.all()
     chosen_patient = patient_data.filter(id=pid)
@@ -90,6 +91,31 @@ def set_patient_state():
     print("Patient state is set. Height: " + str(patient.height) + "cm, weight: " + str(patient.weight) +
           " kg, sex: " + patient.sex + ", resistance: " + str(patient.resistance))
     #    + ", compliance: " + str(compliance))
+
+    # set up model instances
+    # -- create new session
+    curr_pircs = PIRCS(com="C", par="P", int="T", mod=0, val=250)
+    curr_pircs.save()
+
+    curr_patient_state = PatientState(time=patient.time, TLC=patient.TLC,
+                                      pressure_mouth=patient.pressure_mouth, resistance=patient.resistance,
+                                      pressure_alveolus=patient.pressure_alveolus, lung_volume=patient.lung_volume,
+                                      pressure_intrapleural=patient.pressure_intrapleural, flow=patient.flow, log=patient.log)
+    curr_patient_state.save()
+
+    curr_ventilator_state = VentilatorState(pressure=ventilator.pressure, pressure_mouth=ventilator.pressure_mouth,
+                                            mode=ventilator.mode, Pi=ventilator.Pi, PEEP=ventilator.PEEP, rate=ventilator.rate,
+                                            IE=ventilator.IE, phase=ventilator.phase, log=ventilator.log, time=ventilator.time)
+    curr_ventilator_state.save()
+
+    curr_time = int(time.time_ns() / 1000000)
+    curr_session = Session(timestamp=curr_time, pircs=curr_pircs, patientState=curr_patient_state,
+                           ventilatorState=curr_ventilator_state)
+    curr_session.save()
+
+    # -- create new history
+    hist = History(person=chosen_patient[0], session=curr_session)
+    hist.save()
 
 
 # Global patient and ventilator state
@@ -107,8 +133,8 @@ def data(response, n):
 
     # print("PATIENT LOG")
     # print(patient.log)
-    print("VENTILATOR LOG")
-    print(ventilator.log)
+    # print("VENTILATOR LOG")
+    # print(ventilator.log)
 
     ms = int(time.time_ns() / 1000000)  # we want the time in ms
     patient_status = patient.status()
@@ -166,18 +192,6 @@ def patient_info(response):
     global pid
 
     data = Person.objects.all()
-    # chosen_patient = data.filter(id=pid)
-
-    # patient_data = {}
-    # patient_data['id'] = str(chosen_patient[0].id)
-    # patient_data['name] = chosen_patient[0].name
-    # patient_data['weight'] = chosen_patient[0].weight
-    # patient_data['height'] = chosen_patient[0].height
-    # patient_data['sex'] = chosen_patient[0].sex
-    # patient_data['resistance'] = chosen_patient[0].resistance
-    # patient_data['compliance'] = chosen_patient[0].compliance
-    # json_object = json.dumps(patient_data, indent=2)
-
     patients_data = []
 
     for d in data:

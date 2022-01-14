@@ -45,7 +45,10 @@ class PatientState(models.Model):
     log = models.JSONField()
 
     def __str__(self) -> str:
-        return str(self.log[-1])
+        if len(self.log) == 0:
+            return ("time: " + str(self.time) + " - log is not yet available")
+        else:
+            return ("time: " + str(self.time) + " - last logged patient state: " + str(self.log[-1]))
 
 
 class VentilatorState(models.Model):
@@ -61,7 +64,10 @@ class VentilatorState(models.Model):
     time = models.FloatField()
 
     def __str__(self) -> str:
-        return str(self.log[-1])
+        if len(self.log) == 0:
+            return ("time: " + str(self.time) + " - log is not yet available")
+        else:
+            return ("time: " + str(self.time) + " - last logged ventilator state: " + str(self.log[-1]))
 
 
 class Session(models.Model):
@@ -71,7 +77,13 @@ class Session(models.Model):
     ventilatorState = models.OneToOneField(
         VentilatorState, on_delete=models.CASCADE)
 
+    def __str__(self) -> str:
+        return ("time: " + str(self.timestamp))
+
 
 class History(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return ("person: " + self.person.name + " - session: " + str(self.session))

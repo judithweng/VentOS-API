@@ -34,7 +34,7 @@ class Person(models.Model):
 
 
 class PatientState(models.Model):
-    time = models.FloatField()
+    timestamp = models.FloatField()
     TLC = models.FloatField()
     pressure_mouth = models.FloatField()
     resistance = models.FloatField()
@@ -46,12 +46,13 @@ class PatientState(models.Model):
 
     def __str__(self) -> str:
         if len(self.log) == 0:
-            return ("time: " + str(self.time) + " - log is not yet available")
+            return ("time: " + str(self.timestamp) + " - log is not yet available")
         else:
-            return ("time: " + str(self.time) + " - last logged patient state: " + str(self.log[-1]))
+            return ("time: " + str(self.timestamp) + " - last logged patient state: " + str(self.log[-1]))
 
 
 class VentilatorState(models.Model):
+    timestamp = models.FloatField()
     pressure = models.FloatField()
     pressure_mouth = models.FloatField()
     mode = models.CharField(max_length=3)
@@ -61,20 +62,19 @@ class VentilatorState(models.Model):
     IE = models.FloatField()
     phase = models.CharField(max_length=1)
     log = models.JSONField()
-    time = models.FloatField()
 
     def __str__(self) -> str:
         if len(self.log) == 0:
-            return ("time: " + str(self.time) + " - log is not yet available")
+            return ("time: " + str(self.timestamp) + " - log is not yet available")
         else:
-            return ("time: " + str(self.time) + " - last logged ventilator state: " + str(self.log[-1]))
+            return ("time: " + str(self.timestamp) + " - last logged ventilator state: " + str(self.log[-1]))
 
 
 class Session(models.Model):
     timestamp = models.FloatField()
-    pircs = models.OneToOneField(PIRCS, on_delete=models.CASCADE)
-    patientState = models.OneToOneField(PatientState, on_delete=models.CASCADE)
-    ventilatorState = models.OneToOneField(
+    pircs = models.ForeignKey(PIRCS, on_delete=models.CASCADE)
+    patientState = models.ForeignKey(PatientState, on_delete=models.CASCADE)
+    ventilatorState = models.ForeignKey(
         VentilatorState, on_delete=models.CASCADE)
 
     def __str__(self) -> str:

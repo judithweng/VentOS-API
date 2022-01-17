@@ -56,14 +56,14 @@ class VentilatorState(models.Model):
 
 
 class Session(models.Model):
-    timestamp = models.FloatField()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pircs = models.ForeignKey(PIRCS, on_delete=models.CASCADE)
     patientState = models.ForeignKey(PatientState, on_delete=models.CASCADE)
     ventilatorState = models.ForeignKey(
         VentilatorState, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return ("time: " + str(self.timestamp))
+        return ("session id: " + str(self.id))
 
 
 class Person(models.Model):

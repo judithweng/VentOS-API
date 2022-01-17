@@ -109,7 +109,7 @@ def set_patient_state():
     curr_ventilator_state.save()
 
     curr_time = int(time.time_ns() / 1000000)
-    curr_session = Session(timestamp=curr_time, pircs=curr_pircs, patientState=curr_patient_state,
+    curr_session = Session(pircs=curr_pircs, patientState=curr_patient_state,
                            ventilatorState=curr_ventilator_state)
     curr_session.save()
 

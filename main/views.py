@@ -93,7 +93,7 @@ def set_patient_state():
     #    + ", compliance: " + str(compliance))
 
     # set up model instances
-    # -- create new session
+    # create a new session and save current settings to session
     curr_pircs = PIRCS(com="C", par="P", int="T", mod=0, val=250)
     curr_pircs.save()
 
@@ -244,6 +244,10 @@ def control(response):
 
     else:
         form = PostNewCommand()
+
+    # get a new PIRCS setting from vent-display
+    # fetch latest session, use previous setting to advance until current timestamp
+    # save previous PIRCS setting with current Patient and Ventilator states to Session
 
     return render(response, "main/control.html", {"form": form})
 

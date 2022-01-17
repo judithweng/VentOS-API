@@ -81,9 +81,9 @@ class Session(models.Model):
         return ("time: " + str(self.timestamp))
 
 
-class History(models.Model):
-    person = models.OneToOneField(Person, on_delete=models.CASCADE)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+# class History(models.Model):
+#     person = models.OneToOneField(Person, on_delete=models.CASCADE)
+#     session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
-    def __str__(self) -> str:
-        return ("person: " + self.person.name + " - session: " + str(self.session))
+#     def __str__(self) -> str:
+#         return ("person: " + self.person.name + " - session: " + str(self.session))

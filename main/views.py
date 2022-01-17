@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .models import PIRCS, History, PatientState, Person, VentilatorState, Session
+from .models import PIRCS, PatientState, Person, VentilatorState, Session
 from .forms import PostNewCommand, PersonForm
 from django.views.decorators.csrf import csrf_exempt
 from .lung_sim import Patient, Ventilator

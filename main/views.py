@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .models import PIRCS, PatientState, Person, VentilatorState, Session
+from .models import PIRCS, PatientState, VentilatorState, Person, Session
 from .forms import PostNewCommand, PersonForm
 from django.views.decorators.csrf import csrf_exempt
 from .lung_sim import Patient, Ventilator
@@ -97,25 +97,21 @@ def set_patient_state():
     curr_pircs = PIRCS(com="C", par="P", int="T", mod=0, val=250)
     curr_pircs.save()
 
-    curr_patient_state = PatientState(time=patient.time, TLC=patient.TLC,
+    curr_patient_state = PatientState(timestamp=patient.time, TLC=patient.TLC,
                                       pressure_mouth=patient.pressure_mouth, resistance=patient.resistance,
                                       pressure_alveolus=patient.pressure_alveolus, lung_volume=patient.lung_volume,
                                       pressure_intrapleural=patient.pressure_intrapleural, flow=patient.flow, log=patient.log)
     curr_patient_state.save()
 
-    curr_ventilator_state = VentilatorState(pressure=ventilator.pressure, pressure_mouth=ventilator.pressure_mouth,
+    curr_ventilator_state = VentilatorState(timestamp=ventilator.time, pressure=ventilator.pressure, pressure_mouth=ventilator.pressure_mouth,
                                             mode=ventilator.mode, Pi=ventilator.Pi, PEEP=ventilator.PEEP, rate=ventilator.rate,
-                                            IE=ventilator.IE, phase=ventilator.phase, log=ventilator.log, time=ventilator.time)
+                                            IE=ventilator.IE, phase=ventilator.phase, log=ventilator.log)
     curr_ventilator_state.save()
 
     curr_time = int(time.time_ns() / 1000000)
     curr_session = Session(timestamp=curr_time, pircs=curr_pircs, patientState=curr_patient_state,
                            ventilatorState=curr_ventilator_state)
     curr_session.save()
-
-    # -- create new history
-    hist = History(person=chosen_patient[0], session=curr_session)
-    hist.save()
 
 
 # Global patient and ventilator state

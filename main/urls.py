@@ -13,5 +13,5 @@ urlpatterns = [
 
     path('patient/', views.patient_info, name='patient'),
 
-    path('display/', views.set_patient_state)
+    # path('display/', views.set_patient_state)
 ]

@@ -18,21 +18,6 @@ class PIRCS(models.Model):
                 + self.int + ", mod: " + str(self.mod) + ", val: " + str(self.val))
 
 
-class Person(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=50)
-    height = models.FloatField()
-    weight = models.FloatField()
-    sex = models.CharField(max_length=1)
-    resistance = models.FloatField()
-    compliance = models.FloatField()
-
-    def __str__(self) -> str:
-        return ("id: " + str(self.id) + ", name: " + self.name + ", height: " + str(self.height) +
-                " cm, weight: " + str(self.weight) + " kg, sex: " + self.sex +
-                ", resistance: " + str(self.resistance) + ", compliance: " + str(self.compliance))
-
-
 class PatientState(models.Model):
     timestamp = models.FloatField()
     TLC = models.FloatField()
@@ -81,9 +66,17 @@ class Session(models.Model):
         return ("time: " + str(self.timestamp))
 
 
-# class History(models.Model):
-#     person = models.OneToOneField(Person, on_delete=models.CASCADE)
-#     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+class Person(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50)
+    height = models.FloatField()
+    weight = models.FloatField()
+    sex = models.CharField(max_length=1)
+    resistance = models.FloatField()
+    compliance = models.FloatField()
+    session = models.OneToOneField(Session, on_delete=models.CASCADE)
 
-#     def __str__(self) -> str:
-#         return ("person: " + self.person.name + " - session: " + str(self.session))
+    def __str__(self) -> str:
+        return ("id: " + str(self.id) + ", name: " + self.name + ", height: " + str(self.height) +
+                " cm, weight: " + str(self.weight) + " kg, sex: " + self.sex +
+                ", resistance: " + str(self.resistance) + ", compliance: " + str(self.compliance))

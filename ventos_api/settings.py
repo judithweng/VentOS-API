@@ -31,8 +31,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Use WhiteNoise's runserver implementation instead of the Django default, for dev-prod parity.
+    "whitenoise.runserver_nostatic",
+    # Uncomment this and the entry in `urls.py` if you wish to use the Django admin feature:
+    # https://docs.djangoproject.com/en/4.2/ref/contrib/admin/
+    # "django.contrib.admin",
     'corsheaders',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -43,6 +47,11 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Django doesn't support serving static assets in a production-ready way, so we use the
+    # excellent WhiteNoise package to do so instead. The WhiteNoise middleware must be listed
+    # after Django's `SecurityMiddleware` so that security redirects are still performed.
+    # See: https://whitenoise.readthedocs.io
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -123,6 +132,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Don't store the original (un-hashed filename) version of static files, to reduce slug size:
+# https://whitenoise.readthedocs.io/en/latest/django.html#WHITENOISE_KEEP_ONLY_HASHED_FILES
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

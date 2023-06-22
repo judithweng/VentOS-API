@@ -16,7 +16,7 @@ Reference: https://github.com/heroku/python-getting-started/blob/main/gettingsta
 import os
 from pathlib import Path
 
-import django_heroku
+# import django_heroku
 import dj_database_url
 
 

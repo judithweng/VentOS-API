@@ -1,6 +1,6 @@
 # Explicitly declares to Heroku what command is needed to execute the app
 
-web: gunicorn ventos_api.wsgi:application --log-file -
+web gunicorn ventos_api.wsgi:application --log-file -
 
 # Uncomment this `release` process if you are using a database, so that Django's model
 # migrations are run as part of app deployment, using Heroku's Release Phase feature:

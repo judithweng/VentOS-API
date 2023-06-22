@@ -113,42 +113,43 @@ WSGI_APPLICATION = 'ventos_api.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
-# if IS_HEROKU_APP:
-#     # In production on Heroku the database configuration is derived from the `DATABASE_URL`
-#     # environment variable by the dj-database-url package. `DATABASE_URL` will be set
-#     # automatically by Heroku when a database addon is attached to your Heroku app. See:
-#     # https://devcenter.heroku.com/articles/provisioning-heroku-postgres
-#     # https://github.com/jazzband/dj-database-url
-#     DATABASES = {
-#         "default": dj_database_url.config(
-#             conn_max_age=600,
-#             conn_health_checks=True,
-#             ssl_require=True,
-#         ),
-#     }
-# else:
-#     # When running locally in development or in CI, a sqlite database file will be used instead
-#     # to simplify initial setup. Longer term it's recommended to use Postgres locally too.
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
-
-# reference: https://stackoverflow.com/questions/45964514/importerror-import-dj-database-url-importerror-no-module-named-dj-database-u
-if 'DATABASE_URL' in os.environ:
+if IS_HEROKU_APP:
+    # In production on Heroku the database configuration is derived from the `DATABASE_URL`
+    # environment variable by the dj-database-url package. `DATABASE_URL` will be set
+    # automatically by Heroku when a database addon is attached to your Heroku app. See:
+    # https://devcenter.heroku.com/articles/provisioning-heroku-postgres
+    # https://github.com/jazzband/dj-database-url
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        ),
     }
 else:
-    print("Postgres URL not found, using sqlite instead")
+    # When running locally in development or in CI, a sqlite database file will be used instead
+    # to simplify initial setup. Longer term it's recommended to use Postgres locally too.
+    print("Running locally")
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# reference: https://stackoverflow.com/questions/45964514/importerror-import-dj-database-url-importerror-no-module-named-dj-database-u
+# if 'DATABASE_URL' in os.environ:
+#     DATABASES = {
+#         'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+#     }
+# else:
+#     print("Postgres URL not found, using sqlite instead")
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         }
+#     }
 
 
 # Password validation
@@ -189,9 +190,9 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'))
-django_heroku.settings(locals())
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'))
+# django_heroku.settings(locals())
 
 
 STORAGES = {

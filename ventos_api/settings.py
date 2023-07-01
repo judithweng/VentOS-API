@@ -141,7 +141,12 @@ WSGI_APPLICATION = 'ventos_api.wsgi.application'
 # reference: https://stackoverflow.com/questions/45964514/importerror-import-dj-database-url-importerror-no-module-named-dj-database-u
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        # 'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
 else:
     print("Postgres URL not found, using sqlite instead")
@@ -151,6 +156,8 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+
+# DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 
 # Password validation

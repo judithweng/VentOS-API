@@ -17,51 +17,52 @@ from pynverse import inversefunc
 # see https://docs.google.com/spreadsheets/d/1BO59dnA8dqs8TdPTD3WMBnii7FRxPDB1FVFzTB6eVsU/edit?usp=sharing for curves
 
 
-def lung(p):
-    return 6.66 + 27.9 * math.log(p if p > 0 else 0.000000001)
+# def lung(p):
+#     return 6.66 + 27.9 * math.log(p if p > 0 else 0.000000001)
 
 
-def chest_wall(p):
-    return 51.3 * math.exp(0.0635 * p)
+# def chest_wall(p):
+#     return 51.3 * math.exp(0.0635 * p)
 
 
-def total(p):
-    b = 46.2134
-    a = -261.437
-    c = -9.68139
-    d = 11.6401
-    f = 1.2952
-    return b + c * math.sin((p+a)/d) + f * p
+# def total(p):
+#     b = 46.2134
+#     a = -261.437
+#     c = -9.68139
+#     d = 11.6401
+#     f = 1.2952
+#     return b + c * math.sin((p+a)/d) + f * p
 
 
-switch_v_p = {"Total": total,
-              "Lung": lung,
-              "Chest": chest_wall}
-switch_p_v = {"Total": inversefunc(total),
-              "Lung": inversefunc(lung),
-              "Chest": inversefunc(chest_wall)}
+# switch_v_p = {"Total": total,
+#               "Lung": lung,
+#               "Chest": chest_wall}
+# switch_p_v = {"Total": inversefunc(total),
+#               "Lung": inversefunc(lung),
+#               "Chest": inversefunc(chest_wall)}
 
 
-def asscalar(x):
-    is_list = hasattr(x, "item")  # isinstance(x, list)
-    return x.item() if is_list else x
+# def asscalar(x):
+#     is_list = hasattr(x, "item")  # isinstance(x, list)
+#     return x.item() if is_list else x
 
 
-# report volumes as % of total TLC
-def volume_from_pressure(p, type="Total"):
-    func = switch_v_p.get(type, lambda: 'error bad type')
-    return asscalar(func(p))
+# # report volumes as % of total TLC
+# def volume_from_pressure(p, type="Total"):
+#     func = switch_v_p.get(type, lambda: 'error bad type')
+#     return asscalar(func(p))
 
 
-def pressure_from_volume(v, type="Total"):
-    func = switch_p_v.get(type, lambda: 'error bad type')
-    return asscalar(func(v))
+# def pressure_from_volume(v, type="Total"):
+#     func = switch_p_v.get(type, lambda: 'error bad type')
+#     return asscalar(func(v))
 
 
 # setting up Patient
 Patient_log = collections.namedtuple(
     'Patient_log',
-    ['time', 'pressure_mouth', 'pressure_alveolus', 'pressure_intrapleural', 'lung_volume', 'flow'])
+    # ['time', 'pressure_mouth', 'pressure_alveolus', 'pressure_intrapleural', 'lung_volume', 'flow'])
+    ['time', 'pressure_mouth', 'pressure_intrapleural', 'lung_volume', 'flow'])
 
 
 class Patient:
@@ -70,35 +71,52 @@ class Patient:
                  weight=70,  # kg
                  sex='M',  # M or other
                  pressure_mouth=0,  # cmH2O
-                 resistance=10  # cmh2o/l/s or cmh2o per ml/ms
+                 resistance=8,  # cmh2o/l/s or cmh2o per ml/ms
+                 volume=10, #initial lung volume
+                 compliance=60 #ml/ cmH2O 
                  ):
         self.time = 0  # miliseconds
         self.height = height
         self.weight = weight
         self.sex = sex
         self.TLC = 6000 if sex == 'M' else 4200  # todo calculate on age, height weight
-        self.pressure_mouth = pressure_mouth
+        self.pressure_mouth = pressure_mouth  #ventilator pressure
         self.resistance = resistance
-        self.pressure_alveolus = pressure_mouth  # start at equlibrium
-        v_percent = volume_from_pressure(
-            self.pressure_alveolus, 'Total')  # assuming no resp effort
-        self.lung_volume = self.TLC * v_percent / 100
-        self.pressure_intrapleural = pressure_from_volume(v_percent, 'Chest')
+        # self.pressure_alveolus = pressure_mouth  # start at equlibrium, internal pressure
+        # v_percent = volume_from_pressure(
+        #     self.pressure_alveolus, 'Total')  # assuming no resp effort
+        # self.lung_volume = self.TLC * v_percent / 100
+        # self.pressure_intrapleural = pressure_from_volume(v_percent, 'Chest')
+        self.pressure_intrapleural = 0 #dummy number for now, should try to remove 
+
+        self.lung_volume = volume
+        self.compliance = compliance  
+
         self.flow = 0
         self.log = []
 
-    def status(self):
-        return Patient_log(self.time, self.pressure_mouth, self.pressure_alveolus, self.pressure_intrapleural, self.lung_volume, self.flow)
 
-    def advance(self, advance_time=200, pressure_mouth=0):
+
+    def status(self):
+        # return Patient_log(self.time, self.pressure_mouth, self.pressure_alveolus, self.pressure_intrapleural, self.lung_volume, self.flow)
+        return Patient_log(self.time, self.pressure_mouth,  self.pressure_intrapleural, self.lung_volume, self.flow)
+
+    def advance(self, advance_time=200, pressure_mouth=0, volume=1, pressure_intrapleural=0):
         self.time = self.time + advance_time  # miliseconds
         self.pressure_mouth = pressure_mouth
-        gradient = pressure_mouth - self.pressure_alveolus
-        self.flow = gradient / self.resistance  # l/second or ml/ms
-        self.lung_volume += self.flow * advance_time
-        v_percent = self.lung_volume * 100 / self.TLC
-        self.pressure_alveolus = pressure_from_volume(v_percent, "Total")
-        self.pressure_intrapleural = pressure_from_volume(v_percent, "Chest")
+        # gradient = pressure_mouth - self.pressure_alveolus
+        # self.flow = gradient / self.resistance  # l/second or ml/ms
+        # self.lung_volume += self.flow * advance_time
+        # v_percent = self.lung_volume * 100 / self.TLC
+        # self.pressure_alveolus = pressure_from_volume(v_percent, "Total")
+        # self.pressure_intrapleural = pressure_from_volume(v_percent, "Chest")
+        
+        self.lung_volume = volume
+        self.pressure_intrapleural = self.lung_volume/self.compliance
+        gradient = self.pressure_mouth - self.pressure_intrapleural
+        self.flow = gradient/self.resistance
+        self.lung_volume += self.flow
+
         status = self.status()
         self.log.append(status)
         return status
@@ -146,15 +164,16 @@ class Ventilator:
 
 
 def loop(patient, ventilator,
-         start_time=0, end_time=20000, time_resolution=50):
-    # print('starting', patient.status())
+         start_time=0, end_time=200, time_resolution=50):
+    print('starting', patient.status())
     patient_status = patient.advance(advance_time=0)
     # print('vent starting', ventilator.status())
     for current_time in range(start_time, end_time, time_resolution):
         ventilator_status = ventilator.advance(
             advance_time=time_resolution, pressure_mouth=patient_status.pressure_mouth)
         patient_status = patient.advance(
-            advance_time=time_resolution, pressure_mouth=ventilator_status.pressure_mouth)
+            advance_time=time_resolution, pressure_mouth=ventilator_status.pressure_mouth, volume=patient_status.lung_volume)
+        print('running', patient.status())
 
         # if len(events) and events[0]['time']*1000 <= current_time:
         #     e = events.pop(0)

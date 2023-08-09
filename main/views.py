@@ -109,8 +109,12 @@ def set_patient_state():
             patient.compliance -= 8
             patient.resistance += 1
 
-    else:
-        pass
+    elif chosen_condition.name == "COPD":
+        patient.compliance = 50
+        patient.resistance = 15
+        for i in range(chosen_severity.level):
+            patient.compliance += 5
+            patient.resistance += 6
 
     print("Patient state is set. Height: " + str(patient.height) + "cm, weight: " + str(patient.weight) +
           " kg, sex: " + patient.sex + ", resistance: " + str(patient.resistance)

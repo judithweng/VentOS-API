@@ -99,8 +99,10 @@ def set_patient_state():
     patient.sex = chosen_patient[0].sex
 
     #patient resistance and compliance could change depending on condition
-    patient.resistance = chosen_patient[0].resistance
-    patient.compliance = chosen_patient[0].compliance
+    # patient.resistance = chosen_patient[0].resistance
+    # patient.compliance = chosen_patient[0].compliance
+    patient.resistance = 1
+    patient.compliance = 200
 
     if chosen_condition.name == "ARDS":  
         patient.compliance = 40  

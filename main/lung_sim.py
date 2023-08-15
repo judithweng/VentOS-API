@@ -116,7 +116,7 @@ class Patient:
         gradient = self.pressure_mouth - self.pressure_intrapleural
         self.flow = gradient/self.resistance
         # self.lung_volume = self.lung_volume + (self.flow * self.time)
-        self.lung_volume = self.lung_volume + (self.flow)
+        self.lung_volume = self.lung_volume + (self.flow * self.time / 1000.0)
 
 
         status = self.status()

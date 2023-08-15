@@ -72,7 +72,7 @@ class Patient:
                  sex='M',  # M or other
                  pressure_mouth=0,  # cmH2O
                  resistance=8,  # cmh2o/l/s or cmh2o per ml/ms
-                 volume=10, #initial lung volume
+                 volume=150, #initial lung volume
                  compliance=60 #ml/ cmH2O 
                  ):
         self.time = 0  # miliseconds

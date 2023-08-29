@@ -101,8 +101,8 @@ def set_patient_state():
     #patient resistance and compliance could change depending on condition
     # patient.resistance = chosen_patient[0].resistance
     # patient.compliance = chosen_patient[0].compliance
-    patient.resistance = 1
-    patient.compliance = 200
+    patient.resistance = 8
+    patient.compliance = 60
 
     if chosen_condition.name == "ARDS":  
         patient.compliance = 40  
@@ -164,9 +164,9 @@ def data(response, n):
             volume=patient_status.lung_volume, pressure_intrapleural=patient_status.pressure_intrapleural)
 
         p_mmH2O = patient_status.pressure_mouth*10  #pressure graph
-        f = patient_status.flow*10    #flow graph
+        f_ml_per_min = patient_status.flow*1000    #flow graph
 
-        # print('running', patient_status.flow)
+        print('running', patient_status.flow)
 
         p_pirds = {"event": "M",
                    "type": "D",
@@ -179,7 +179,7 @@ def data(response, n):
                    "loc": "I",
                    "num": 0,
                    'ms': current_sample_ms,
-                   'val': f}
+                   'val': f_ml_per_min} ###changed f to a constant #I wonder if pirds means flow value and multiply that by 1000?
         pirds_samples.append(p_pirds)
         pirds_samples.append(f_pirds)
 
@@ -189,6 +189,8 @@ def data(response, n):
     response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
     response["Access-Control-Max-Age"] = "1000"
     response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
+
+    # print("the flow is ", f/10)
 
     return response
 

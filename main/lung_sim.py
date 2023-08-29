@@ -58,6 +58,24 @@ from pynverse import inversefunc
 #     return asscalar(func(v))
 
 
+def calculate(V, C, P_vent, R, t):
+
+    #compute P_int from C
+    P_int = V/C #compute pressure cmH2O
+
+    #compute dP
+    dP = P_vent - P_int #change in pressure cmH2O
+
+    dV_ml_per_ms = dP / R  #flow ml/ms
+    dV_l_per_min = dV_ml_per_ms * 60 # l/min = ml/ms * 1000ms/s * 60s/min * 1L/1000ml 
+
+    #report it in ml per min
+
+    V = V + (dV_ml_per_ms * t)    #volume ml
+
+    return V, dV_ml_per_ms, dV_l_per_min, P_int
+
+
 # setting up Patient
 Patient_log = collections.namedtuple(
     'Patient_log',
@@ -71,8 +89,8 @@ class Patient:
                  weight=70,  # kg
                  sex='M',  # M or other
                  pressure_mouth=0,  # cmH2O
-                 resistance=8,  # cmh2o/l/s or cmh2o per ml/ms
-                 volume=10, #initial lung volume
+                 resistance=8,  # cmh2o/ l/s or cmh2o/ml/ms
+                 volume=1200, #initial lung volume
                  compliance=60 #ml/ cmH2O 
                  ):
         self.time = 0  # miliseconds
@@ -92,7 +110,7 @@ class Patient:
         self.lung_volume = volume
         self.compliance = compliance  
 
-        self.flow = 0
+        self.flow = 0 #ml / minute
         self.log = []
 
 
@@ -101,27 +119,44 @@ class Patient:
         # return Patient_log(self.time, self.pressure_mouth, self.pressure_alveolus, self.pressure_intrapleural, self.lung_volume, self.flow)
         return Patient_log(self.time, self.pressure_mouth,  self.pressure_intrapleural, self.lung_volume, self.flow)
 
-    def advance(self, advance_time=200, pressure_mouth=0, volume=1, pressure_intrapleural=0):
+    def advance(self, advance_time=200, pressure_mouth=0, volume=1200, pressure_intrapleural=0):
         self.time = self.time + advance_time  # miliseconds
-        self.pressure_mouth = pressure_mouth
-        # gradient = pressure_mouth - self.pressure_alveolus
-        # self.flow = gradient / self.resistance  # l/second or ml/ms
-        # self.lung_volume += self.flow * advance_time
-        # v_percent = self.lung_volume * 100 / self.TLC
-        # self.pressure_alveolus = pressure_from_volume(v_percent, "Total")
-        # self.pressure_intrapleural = pressure_from_volume(v_percent, "Chest")
+        # self.pressure_mouth = pressure_mouth #cmH2O
+        # # gradient = pressure_mouth - self.pressure_alveolus
+        # # self.flow = gradient / self.resistance  # l/second or ml/ms
+        # # self.lung_volume += self.flow * advance_time
+        # # v_percent = self.lung_volume * 100 / self.TLC
+        # # self.pressure_alveolus = pressure_from_volume(v_percent, "Total")
+        # # self.pressure_intrapleural = pressure_from_volume(v_percent, "Chest")
         
-        self.lung_volume = volume
-        self.pressure_intrapleural = self.lung_volume/self.compliance
-        gradient = self.pressure_mouth - self.pressure_intrapleural
-        self.flow = gradient/self.resistance
-        # self.lung_volume = self.lung_volume + (self.flow * self.time)
-        self.lung_volume = self.lung_volume + (self.flow * self.time / 1000.0)
+        # self.lung_volume = volume  #ml
+        # self.pressure_intrapleural = self.lung_volume/self.compliance    #cmH2o = ml /  (ml/ cmH2O)
+        # gradient = self.pressure_mouth - self.pressure_intrapleural #cmH2o
+        # flow_ms = gradient/self.resistance   # ml/ms  =  cmH2o / (cmh2o/ (ml/ms) )
+        # #change flow from per ms to per min
+        # self.flow = flow_ms * 1000 * 60  #ml/min = ml/ms * (1000ms/1s) * (60s/1min) 
 
+        # #pircs says f is in ml/s?
+        # # self.flow = flow_ms * 1000   #ml/s = ml/ms * (1000ms/1s) 
+
+        # # self.lung_volume = self.lung_volume + (self.flow * self.time)
+        # self.lung_volume = self.lung_volume + (flow_ms * advance_time)  #ml = ml + (ml/ms * ms)
+ 
+        V, dV_ml_per_ms, dV_l_per_min, P_int=calculate(volume, self.compliance, pressure_mouth, self.resistance, advance_time)
+        # self.flow = dV_ml_per_ms
+        self.flow = dV_l_per_min
+        self.lung_volume = V
+        self.pressure_intrapleural=P_int
+        self.pressure_mouth = pressure_mouth
+
+
+        # print("the flow is ", dV_l_per_min)
 
         status = self.status()
         self.log.append(status)
         return status
+    
+    
 
 
 # setting up Ventilator
@@ -167,7 +202,6 @@ class Ventilator:
 
 def loop(patient, ventilator,
          start_time=0, end_time=200, time_resolution=50):
-    print('starting', patient.status())
     patient_status = patient.advance(advance_time=0)
     # print('vent starting', ventilator.status())
     for current_time in range(start_time, end_time, time_resolution):
@@ -175,7 +209,6 @@ def loop(patient, ventilator,
             advance_time=time_resolution, pressure_mouth=patient_status.pressure_mouth)
         patient_status = patient.advance(
             advance_time=time_resolution, pressure_mouth=ventilator_status.pressure_mouth, volume=patient_status.lung_volume)
-        print('running', patient.status())
 
         # if len(events) and events[0]['time']*1000 <= current_time:
         #     e = events.pop(0)
